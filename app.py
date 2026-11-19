@@ -68,21 +68,62 @@ class Application(db.Model):
 
 
 def seed():
-    if User.query.count() == 0:
-        db.session.add(User(name='Vishwajeet', email='student@example.com', password=generate_password_hash('student123'), role='student', skills='Python, Flask, HTML, CSS, SQL', education='BCS', phone='+91 90000 00000', location='Pune, Maharashtra'))
-        db.session.add(User(name='Admin', email='admin@example.com', password=generate_password_hash('admin123'), role='admin'))
-        db.session.add(User(name='Nexora HR', email='company@example.com', password=generate_password_hash('company123'), role='company', company_name='Nexora Technologies', company_description='Technology company building modern software, cloud and digital solutions.', website='https://example.com', company_location='Pune, Maharashtra', recruiter_name='Nexora HR', phone='+91 98765 43210'))
-        db.session.commit()
-    if Job.query.count() == 0:
-        company = User.query.filter_by(role='company').first()
-        jobs = [
-            Job(title='Python Developer Intern', company='Nexora Technologies', company_id=company.id if company else None, location='Pune', job_type='Internship', mode='Hybrid', salary='₹10,000 / month', skills='Python, Flask, SQL', description='Work on Python web applications, APIs and database features.', deadline='30 Oct 2026'),
-            Job(title='Frontend Developer', company='TechNova Solutions', location='Mumbai', job_type='Full Time', mode='On-site', salary='₹4 - ₹7 LPA', skills='HTML, CSS, JavaScript, Bootstrap', description='Build responsive interfaces and reusable frontend components.', deadline='05 Nov 2026'),
-            Job(title='Cloud / DevOps Intern', company='CloudBridge', location='Remote', job_type='Internship', mode='Remote', salary='₹12,000 / month', skills='Linux, AWS, Docker, Git', description='Assist with cloud infrastructure, CI/CD and deployment automation.', deadline='12 Nov 2026'),
-            Job(title='Cyber Security Intern', company='SecureStack', location='Pune', job_type='Internship', mode='Hybrid', salary='₹8,000 / month', skills='Networking, Linux, Security', description='Learn security monitoring, vulnerability assessment and incident response.', deadline='20 Nov 2026')]
-        db.session.add_all(jobs)
+    admin_user = User.query.filter_by(email='admin@example.com').first()
+
+    if not admin_user:
+        db.session.add(User(
+            name='Admin',
+            email='admin@example.com',
+            password=generate_password_hash('admin123'),
+            role='admin'
+        ))
         db.session.commit()
 
+    student = User.query.filter_by(email='student@example.com').first()
+
+    if student is None:
+        student = User(
+            name='Sayali Sutar',
+            email='student@example.com',
+            password=generate_password_hash('student123'),
+            role='student',
+            skills='Python, Flask, HTML, CSS, SQL',
+            education='BCS'
+        )
+        db.session.add(student)
+    else:
+        student.name = 'Sayali Sutar'
+
+    company = User.query.filter_by(email='company@example.com').first()
+
+    if company is None:
+        company = User(
+            name='Nexora HR',
+            email='company@example.com',
+            password=generate_password_hash('company123'),
+            role='company',
+            company_name='Nexora Technologies'
+        )
+        db.session.add(company)
+
+    db.session.commit()
+
+    if Job.query.count() == 0:
+        company = User.query.filter_by(role='company').first()
+
+        db.session.add(Job(
+            title='Python Developer Intern',
+            company='Nexora Technologies',
+            company_id=company.id if company else None,
+            location='Pune',
+            job_type='Internship',
+            mode='Hybrid',
+            salary='₹10,000 / month',
+            skills='Python, Flask, SQL',
+            description='Work on Python web applications.',
+            deadline='30 Oct 2026'
+        ))
+        db.session.commit()
 
 def current_user():
     return db.session.get(User, session['user_id']) if session.get('user_id') else None
